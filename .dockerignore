@@ -1,0 +1,28 @@
+
+# Docker
+docker/
+
+# Git
+.gitignore
+
+# IDE
+.idea
+.vscode
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test
+.pytest_cache/
+
+# Virtual Env
+.venv
+venv
+
+# Distribution
+dist/
+
+# mypy
+.mypy_cache/
