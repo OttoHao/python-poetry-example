@@ -1,9 +1,8 @@
-# Dockerfile
-# Uses multi-stage builds requiring Docker 17.05 or higher
-# See https://docs.docker.com/develop/develop-images/multistage-build/
-
 # Creating a python base with shared environment variables
 FROM python:3.8.16-slim as python-base
+
+ARG PAT
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=off \
@@ -13,7 +12,9 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_NO_INTERACTION=1 \
     PYSETUP_PATH="/opt/pysetup" \
-    VENV_PATH="/opt/pysetup/.venv"
+    VENV_PATH="/opt/pysetup/.venv" \
+    POETRY_HTTP_BASIC_ALCHEMIST_PYTHON_SHARED_USERNAME="alchemist" \
+    POETRY_HTTP_BASIC_ALCHEMIST_PYTHON_SHARED_PASSWORD=$PAT
 
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
@@ -27,7 +28,7 @@ RUN apt-get update \
 
 # Install Poetry - respects $POETRY_VERSION & $POETRY_HOME
 ENV POETRY_VERSION=1.4.2
-RUN curl -sSL https://install.python-poetry.org | python -
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # We copy our Python requirements here to cache them
 # and install only runtime deps using poetry
@@ -41,9 +42,7 @@ RUN poetry install --no-root --only main
 FROM python-base as production
 
 COPY --from=builder-base $VENV_PATH $VENV_PATH
-
 COPY ./app /app
 WORKDIR /app
-
 
 CMD [ "python", "main.py"]
